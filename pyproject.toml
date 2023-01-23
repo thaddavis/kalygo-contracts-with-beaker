@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "getting-started"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+beaker-pyteal = "^0.4.2"
+
+[tool.poetry.scripts]
+demo = 'src.main:demo'
+calc = 'src.Calculator:main'
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
