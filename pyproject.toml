@@ -4,15 +4,15 @@ version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
-packages = [{include = "src"}]
+packages = [{include = "scripts"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 beaker-pyteal = "^0.4.2"
 
 [tool.poetry.scripts]
-demo = 'src.main:demo'
-calc = 'src.Calculator:main'
+compile_with_beaker = "scripts.escrow.compile_with_beaker:main"
+deploy_with_beaker = "scripts.escrow.deploy_with_beaker:main"
 
 [build-system]
 requires = ["poetry-core"]
