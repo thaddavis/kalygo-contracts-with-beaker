@@ -13,6 +13,7 @@ beaker-pyteal = "^0.4.2"
 [tool.poetry.scripts]
 compile_with_beaker = "scripts.escrow.compile_with_beaker:main"
 deploy_with_beaker = "scripts.escrow.deploy_with_beaker:main"
+test_atc = "scripts.escrow.test_abi_method_with_atc:main"
 
 [build-system]
 requires = ["poetry-core"]

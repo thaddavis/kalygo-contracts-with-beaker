@@ -14,13 +14,14 @@ import config.escrow as config
 
 def main():
 
+    deployer_address = config.account_a_address
     deployer_mnemonic = config.account_a_mnemonic
     deployer_private_key = get_private_key_from_mnemonic(deployer_mnemonic)
     signer = AccountTransactionSigner(deployer_private_key)
 
     escrowContract = EscrowContract()
     app_client = ApplicationClient(
-        client=Algod().getClient(config.algod_token, config.algod_url),
+        client=Algod().getClient(),
         app=escrowContract,
         signer=signer,
     )
@@ -29,12 +30,15 @@ def main():
 
     app_client.create(global_buyer_pullout_flag=0)
 
+    print(f"deployed app_id: {app_client.app_id}")
     print(f"Current app state: {app_client.get_application_state()}")
     app_client.call(escrowContract.increment)
     print(f"Current app state: {app_client.get_application_state()}")
+    # print("deleting...")
+    # app_client.delete(deployer_address, signer)
 
     print("DONE")
 
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()

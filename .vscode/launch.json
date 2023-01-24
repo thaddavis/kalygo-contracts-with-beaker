@@ -6,7 +6,7 @@
             "type": "python",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "module": "src.Test",
+            "module": "scripts.escrow.deploy_with_beaker",
             "args": []
         }
     ]

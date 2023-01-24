@@ -1,11 +1,6 @@
 # localhost
 
-env = "TestNet"
-algod_url = "http://localhost:4001"
-algod_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-indexer_url = "http://localhost:8980"
-indexer_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-app_id = 71
+app_id = 65
 wallet_id = "wallet_QWEASD"
 wallet_phrase = ""
 account_a_address = "F2BLSIT7DMRXBVE6OT53U3UNTN7KAF36LW5AW6SOBKJSKTMCMXRATIU64A"
@@ -24,11 +19,6 @@ enable_time_checks = True
 
 # MAINNET
 
-# env = "TestNet"
-# algod_url = "http://localhost:4001"
-# algod_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-# indexer_url = "http://localhost:8980"
-# indexer_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 # app_id = 339
 # wallet_id = "wallet_QWEASD"
 # wallet_phrase = "novel joy soldier speak vote book length screen broom job require agent garbage convince eight when oven federal dumb transfer mystery pulse similar ability senior"

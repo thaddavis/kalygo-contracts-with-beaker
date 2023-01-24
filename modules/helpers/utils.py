@@ -8,7 +8,7 @@ import base64
 from algosdk.encoding import encode_address
 
 MICRO_ALGO = 1
-ALGO = MICRO_ALGO * (10 ** 6)
+ALGO = MICRO_ALGO * (10**6)
 
 
 def get_kmd_client(address="http://localhost:4002", token="a" * 64) -> KMDClient:
@@ -17,14 +17,13 @@ def get_kmd_client(address="http://localhost:4002", token="a" * 64) -> KMDClient
 
 def get_keys_from_wallet(
     kmd_client: KMDClient, wallet_name="unencrypted-default-wallet", wallet_password=""
-) -> 'list[str] | None':
+) -> "list[str] | None":
     wallets = kmd_client.list_wallets()
 
     handle = None
     for wallet in wallets:
         if wallet["name"] == wallet_name:
-            handle = kmd_client.init_wallet_handle(
-                wallet["id"], wallet_password)
+            handle = kmd_client.init_wallet_handle(wallet["id"], wallet_password)
             break
 
     if handle is None:
@@ -54,7 +53,7 @@ def generate_account():
 
 def make_atomic(
     signing_keys=[], transactions=[]
-) -> 'list[transaction.SignedTransaction]':
+) -> "list[transaction.SignedTransaction]":
     return [
         tx.sign(key)
         for key, tx in zip(
@@ -84,12 +83,14 @@ def wait_for_confirmation(client, txid):
     )
     return txinfo
 
+
 # helper function to compile program source
 
 
 def compile_program(client, source_code):
     compile_response = client.compile(source_code)
     return base64.b64decode(compile_response["result"])
+
 
 # convert 64 bit integer i to byte string
 
@@ -98,7 +99,7 @@ def intToBytes(i):
     return i.to_bytes(8, "big")
 
 
-def format_application_info_global_state(state):
+def format_app_global_state(state):
     formatted = {}
 
     for item in state:
@@ -108,8 +109,7 @@ def format_application_info_global_state(state):
         if value["type"] == 1:
             # byte string
             if formatted_key == "owner":
-                formatted_value = encode_address(
-                    base64.b64decode(value["bytes"]))
+                formatted_value = encode_address(base64.b64decode(value["bytes"]))
             else:
                 formatted_value = value["bytes"]
             formatted[formatted_key] = formatted_value
@@ -128,8 +128,7 @@ def format_state(state):
         if value["type"] == 1:
             # byte string
             if formatted_key == "owner":
-                formatted_value = encode_address(
-                    base64.b64decode(value["bytes"]))
+                formatted_value = encode_address(base64.b64decode(value["bytes"]))
             else:
                 formatted_value = value["bytes"]
             formatted[formatted_key] = formatted_value
@@ -137,6 +136,7 @@ def format_state(state):
             # integer
             formatted[formatted_key] = value["uint"]
     return formatted
+
 
 # read app global state
 
