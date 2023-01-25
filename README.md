@@ -8,10 +8,7 @@ All tests are using the code in found in the modules folder as helper functions.
 
 ## Useful commands
 
-poetry run deploy
-poetry run pytest
-poetry run pytest -s
-poetry run pytest tests
-pytest -n 2 test
-./build.sh contracts.escrow.contract
-python -m pytest -s
+- poetry run deploy
+- poetry run pytest
+- poetry run compile_with_beaker
+- python -m pytest -s
