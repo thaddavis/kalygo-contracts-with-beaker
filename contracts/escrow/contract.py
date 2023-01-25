@@ -1,17 +1,17 @@
+# type: ignore
+
 from typing import Final
-from pyteal import abi, TealType, Global, Int, Seq, Approve, Reject, If
+from pyteal import *
+from pyteal.ast.bytes import Bytes
 from beaker.application import Application
 from beaker.client.application_client import ApplicationClient
+from beaker.decorators import external, create, delete, Authorize
 from beaker import sandbox
 from beaker.state import ApplicationStateValue
 import json
 
-from contracts.escrow.DeleteMixin import DeleteMixin
-from .InitMixin import InitMixin
-from .subroutines import Subroutine_Increment_Mixin
 
-
-class EscrowContract(InitMixin, DeleteMixin, Subroutine_Increment_Mixin):
+class EscrowContract(Application):
 
     global_buyer_pullout_flag: ApplicationStateValue = ApplicationStateValue(
         stack_type=TealType.uint64, default=Int(0)
@@ -22,3 +22,137 @@ class EscrowContract(InitMixin, DeleteMixin, Subroutine_Increment_Mixin):
     global_seller_arbitration_flag: ApplicationStateValue = ApplicationStateValue(
         stack_type=TealType.uint64, default=Int(0)
     )
+    global_creator: ApplicationStateValue = ApplicationStateValue(
+        stack_type=TealType.bytes, default=Txn.sender()
+    )
+    global_buyer: ApplicationStateValue = ApplicationStateValue(
+        stack_type=TealType.bytes
+    )
+    global_seller: ApplicationStateValue = ApplicationStateValue(
+        stack_type=TealType.bytes
+    )
+    global_escrow_payment_1: ApplicationStateValue = ApplicationStateValue(
+        stack_type=TealType.uint64
+    )
+    global_escrow_payment_2: ApplicationStateValue = ApplicationStateValue(
+        stack_type=TealType.uint64
+    )
+    global_total_price: ApplicationStateValue = ApplicationStateValue(
+        stack_type=TealType.uint64
+    )
+    global_inspection_start_date: ApplicationStateValue = ApplicationStateValue(
+        stack_type=TealType.uint64
+    )
+    global_inspection_end_date: ApplicationStateValue = ApplicationStateValue(
+        stack_type=TealType.uint64
+    )
+    global_inspection_extension_date: ApplicationStateValue = ApplicationStateValue(
+        stack_type=TealType.uint64
+    )
+    global_moving_date: ApplicationStateValue = ApplicationStateValue(
+        stack_type=TealType.uint64
+    )
+    global_closing_date: ApplicationStateValue = ApplicationStateValue(
+        stack_type=TealType.uint64
+    )
+    global_free_funds_date: ApplicationStateValue = ApplicationStateValue(
+        stack_type=TealType.uint64
+    )
+    global_asa_id: ApplicationStateValue = ApplicationStateValue(
+        stack_type=TealType.uint64
+    )
+
+    @create
+    def create(
+        self,
+        global_buyer: abi.Address,
+        global_seller: abi.Address,
+        global_escrow_payment_1: abi.Uint64,
+        global_escrow_payment_2: abi.Uint64,
+        global_total_price: abi.Uint64,
+        global_inspection_start_date: abi.Uint64,
+        global_inspection_end_date: abi.Uint64,
+        global_inspection_extension_date: abi.Uint64,
+        global_moving_date: abi.Uint64,
+        global_closing_date: abi.Uint64,
+        global_free_funds_date: abi.Uint64,
+        global_asa_id: abi.Uint64,
+    ):
+        return Seq(
+            self.initialize_application_state(),
+            self.global_buyer.set(global_buyer.get()),  # type: ignore
+            self.global_seller.set(global_seller.get()),  # type: ignore
+            self.global_asa_id.set(global_asa_id.get()),  # type: ignore
+            If(
+                And(
+                    global_escrow_payment_1.get() >= Int(100000),  # escrow 1 uint64
+                    global_escrow_payment_2.get() >= Int(100000),  # escrow 2 uint64
+                    (global_escrow_payment_1.get() + global_escrow_payment_2.get())
+                    == global_total_price.get(),  # make sure escrow 1 + 2 == total
+                )
+            )
+            .Then(
+                Seq(
+                    self.global_escrow_payment_1.set(global_escrow_payment_1.get()),  # type: ignore
+                    self.global_escrow_payment_2.set(global_escrow_payment_2.get()),  # type: ignore
+                    self.global_total_price.set(global_total_price.get()),  # type: ignore
+                )
+            )
+            .Else(Reject()),
+            If(
+                And(
+                    global_inspection_start_date.get()
+                    <= global_inspection_end_date.get(),
+                    global_inspection_end_date.get()
+                    <= global_inspection_extension_date.get(),
+                    global_inspection_extension_date.get() <= global_moving_date.get(),
+                    global_moving_date.get() <= global_closing_date.get(),
+                    global_closing_date.get() <= global_free_funds_date.get(),
+                )
+            )
+            .Then(
+                Seq(
+                    self.global_inspection_start_date.set(global_inspection_start_date.get()),  # type: ignore
+                    self.global_inspection_end_date.set(global_inspection_end_date.get()),  # type: ignore
+                    self.global_inspection_extension_date.set(global_inspection_extension_date.get()),  # type: ignore
+                    self.global_moving_date.set(global_moving_date.get()),  # type: ignore
+                    self.global_closing_date.set(global_closing_date.get()),  # type: ignore
+                    self.global_free_funds_date.set(global_free_funds_date.get()),  # type: ignore
+                )
+            )
+            .Else(Reject()),
+        )
+
+    @delete
+    def delete(self):
+        return Approve()
+
+    @Subroutine(TealType.uint64)
+    def guard_buyer_set_arbitration(acct: Expr):
+        return Seq(
+            Or(
+                And(
+                    Global.group_size() == Int(1),
+                    App.globalGet(Bytes("global_buyer")) == acct
+                    # self.global_buyer.get() == acct
+                    # App.globalGet(GLOBAL_BUYER) == Txn.sender(),
+                    # Txn.application_args[0] == BUYER_SET_ARBITRATION,
+                    # App.globalGet(GLOBAL_ENABLE_TIME_CHECKS) == Int(1),
+                    # Global.latest_timestamp() < App.globalGet(GLOBAL_CLOSING_DATE),
+                ),
+                And(
+                    Int(0)
+                ),  # CHECK IF OTHER PARTY HAS RAISED ARBITRATION IN WHICH CASE ALLOW EXTENSION TO RAISE ARB FLAG
+            )
+        )
+
+    @external(authorize=guard_buyer_set_arbitration)
+    def buyer_set_arbitration(self):
+        return Seq(
+            If(self.global_buyer_pullout_flag == Int(0))  # type: ignore
+            .Then(
+                self.global_buyer_pullout_flag.set(Int(1)),  # type: ignore
+                Approve(),
+            )
+            .Else(Reject())
+        )
