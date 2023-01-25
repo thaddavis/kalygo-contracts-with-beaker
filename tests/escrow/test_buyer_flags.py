@@ -102,3 +102,23 @@ def test_buyer_arbitration_flag(escrow_contract):
     # print(json.dumps(app_info_formatted, indent=4))
 
     assert app_info_formatted["global_buyer_arbitration_flag"] == 1
+    assert app_info_formatted["global_buyer_pullout_flag"] == 0
+
+    atc_2 = AtomicTransactionComposer()
+
+    atc_2.add_method_call(
+        app_id,
+        c.get_method_by_name("buyer_set_pullout"),
+        sender_address,
+        sp,
+        signer,
+        method_args=[],
+    )
+
+    # Execute Txn
+    atc_2.execute(algod_client, 2)
+
+    app_info = Algod.getClient().application_info(app_id)
+    app_info_formatted = format_app_global_state(app_info["params"]["global-state"])
+
+    assert app_info_formatted["global_buyer_pullout_flag"] == 1

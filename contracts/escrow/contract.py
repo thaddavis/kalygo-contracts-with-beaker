@@ -10,6 +10,13 @@ from beaker import sandbox
 from beaker.state import ApplicationStateValue
 import json
 
+from .constants import (
+    GLOBAL_CLOSING_DATE,
+    GLOBAL_BUYER,
+    GLOBAL_INSPECTION_END_DATE,
+    GLOBAL_SELLER,
+)
+
 
 class EscrowContract(Application):
 
@@ -133,12 +140,86 @@ class EscrowContract(Application):
             Or(
                 And(
                     Global.group_size() == Int(1),
-                    App.globalGet(Bytes("global_buyer")) == acct
+                    App.globalGet(GLOBAL_BUYER) == acct,
                     # self.global_buyer.get() == acct
-                    # App.globalGet(GLOBAL_BUYER) == Txn.sender(),
-                    # Txn.application_args[0] == BUYER_SET_ARBITRATION,
-                    # App.globalGet(GLOBAL_ENABLE_TIME_CHECKS) == Int(1),
-                    # Global.latest_timestamp() < App.globalGet(GLOBAL_CLOSING_DATE),
+                    Global.latest_timestamp() < App.globalGet(GLOBAL_CLOSING_DATE),
+                    # App.globalGet(GLOBAL_ENABLE_TIME_CHECKS) == Int(1)
+                ),
+                And(
+                    Int(0)
+                ),  # TODO CHECK IF OTHER PARTY HAS RAISED ARBITRATION IN WHICH CASE ALLOW EXTENSION TO RAISE ARB FLAG
+            )
+        )
+
+    @external(authorize=guard_buyer_set_arbitration)
+    def buyer_set_arbitration(self):
+        return Seq(
+            self.global_buyer_arbitration_flag.set(Int(1)),
+            Approve(),
+        )
+
+    @Subroutine(TealType.uint64)
+    def guard_buyer_set_pullout(acct: Expr):
+        return Seq(
+            And(
+                App.globalGet(GLOBAL_BUYER) == Txn.sender(),
+                Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_END_DATE),
+            )
+        )
+
+    @external(authorize=guard_buyer_set_pullout)
+    def buyer_set_pullout(self):
+        return Seq(
+            self.global_buyer_pullout_flag.set(Int(1)),
+            Approve(),
+        )
+
+    @Subroutine(TealType.uint64)
+    def guard_optin_to_ASA(acct: Expr):
+        return Seq(
+            And(
+                Txn.sender() == App.globalGet(GLOBAL_BUYER),
+            )
+        )
+
+    @external(authorize=guard_optin_to_ASA)
+    def optin_to_ASA(self):
+        return Seq(
+            self.global_buyer_pullout_flag.set(Int(1)),
+            Approve(),
+        )
+
+    @Subroutine(TealType.uint64)
+    def guard_optout_from_ASA(acct: Expr):
+        return Seq(Int(1))
+
+    @external(authorize=guard_optout_from_ASA)
+    def optout_from_ASA(self):
+        return Seq(
+            [
+                InnerTxnBuilder.Begin(),
+                InnerTxnBuilder.SetFields(
+                    {
+                        TxnField.type_enum: TxnType.AssetTransfer,
+                        TxnField.xfer_asset: self.global_asa_id.get(),  # stablecoin ASA
+                        TxnField.asset_close_to: Global.current_application_address(),
+                        TxnField.sender: Global.current_application_address(),
+                        TxnField.asset_receiver: Global.current_application_address(),
+                        TxnField.fee: Int(0),
+                    }
+                ),
+                InnerTxnBuilder.Submit(),
+                Approve(),
+            ]
+        )
+
+    @Subroutine(TealType.uint64)
+    def guard_seller_set_arbitration(acct: Expr):
+        return Seq(
+            Or(
+                And(
+                    App.globalGet(GLOBAL_SELLER) == Txn.sender(),
+                    Global.latest_timestamp() < App.globalGet(GLOBAL_CLOSING_DATE),
                 ),
                 And(
                     Int(0)
@@ -146,13 +227,9 @@ class EscrowContract(Application):
             )
         )
 
-    @external(authorize=guard_buyer_set_arbitration)
-    def buyer_set_arbitration(self):
+    @external(authorize=guard_seller_set_arbitration)
+    def seller_set_arbitration(self):
         return Seq(
-            If(self.global_buyer_arbitration_flag == Int(0))  # type: ignore
-            .Then(
-                self.global_buyer_arbitration_flag.set(Int(1)),  # type: ignore
-                Approve(),
-            )
-            .Else(Reject())
+            self.global_seller_arbitration_flag.set(Int(1)),
+            Approve(),
         )
