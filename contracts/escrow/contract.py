@@ -15,6 +15,7 @@ from .constants import (
     GLOBAL_BUYER,
     GLOBAL_INSPECTION_END_DATE,
     GLOBAL_SELLER,
+    GLOBAL_ASA_ID,
 )
 
 
@@ -185,8 +186,21 @@ class EscrowContract(Application):
     @external(authorize=guard_optin_to_ASA)
     def optin_to_ASA(self):
         return Seq(
-            self.global_buyer_pullout_flag.set(Int(1)),
-            Approve(),
+            [
+                InnerTxnBuilder.Begin(),
+                InnerTxnBuilder.SetFields(
+                    {
+                        TxnField.type_enum: TxnType.AssetTransfer,
+                        TxnField.xfer_asset: App.globalGet(GLOBAL_ASA_ID),
+                        TxnField.asset_amount: Int(0),
+                        TxnField.sender: Global.current_application_address(),
+                        TxnField.asset_receiver: Global.current_application_address(),
+                        TxnField.fee: Int(0),
+                    }
+                ),
+                InnerTxnBuilder.Submit(),
+                Approve(),
+            ]
         )
 
     @Subroutine(TealType.uint64)
@@ -232,4 +246,70 @@ class EscrowContract(Application):
         return Seq(
             self.global_seller_arbitration_flag.set(Int(1)),
             Approve(),
+        )
+
+    @Subroutine(TealType.uint64)
+    def guard_withdraw_ASA(acct: Expr):
+        return Seq(
+            Or(
+                App.globalGet(GLOBAL_SELLER) == Txn.sender(),
+                App.globalGet(GLOBAL_BUYER) == Txn.sender(),
+            )
+        )
+
+    @external(authorize=guard_withdraw_ASA)
+    def withdraw_ASA(self):
+        contract_ASA_balance = AssetHolding.balance(
+            Global.current_application_address(), App.globalGet(GLOBAL_ASA_ID)
+        )
+        return Seq(
+            [
+                contract_ASA_balance,
+                # ASA back to sender
+                InnerTxnBuilder.Begin(),
+                InnerTxnBuilder.SetFields(
+                    {
+                        TxnField.type_enum: TxnType.AssetTransfer,
+                        TxnField.xfer_asset: App.globalGet(GLOBAL_ASA_ID),
+                        # vvv simulate amount of ASA to return to sender vvv
+                        # TxnField.asset_amount: Btoi(Txn.application_args[2]),
+                        TxnField.asset_amount: contract_ASA_balance.value(),
+                        TxnField.sender: Global.current_application_address(),
+                        TxnField.asset_receiver: Txn.sender(),
+                        TxnField.fee: Int(0),
+                    }
+                ),
+                InnerTxnBuilder.Submit(),
+                Approve(),
+            ]
+        )
+
+    @Subroutine(TealType.uint64)
+    def guard_withdraw_balance(acct: Expr):
+        return Seq(
+            Or(
+                App.globalGet(GLOBAL_BUYER) == Txn.sender(),
+                App.globalGet(GLOBAL_SELLER) == Txn.sender(),
+            )
+        )
+
+    @external(authorize=guard_withdraw_balance)
+    def withdraw_balance():
+        return Seq(
+            [
+                InnerTxnBuilder.Begin(),
+                InnerTxnBuilder.SetFields(
+                    {
+                        TxnField.type_enum: TxnType.Payment,
+                        TxnField.amount: Balance(Global.current_application_address())
+                        - Global.min_txn_fee(),
+                        TxnField.sender: Global.current_application_address(),
+                        TxnField.receiver: Txn.sender(),
+                        TxnField.fee: Global.min_txn_fee(),
+                        TxnField.close_remainder_to: Txn.sender(),
+                    }
+                ),
+                InnerTxnBuilder.Submit(),
+                Approve(),
+            ]
         )

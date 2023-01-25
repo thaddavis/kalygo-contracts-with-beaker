@@ -52,9 +52,9 @@ def test_initial_state(escrow_contract):
     app_info_formatted = format_app_global_state(app_info["params"]["global-state"])
     print(json.dumps(app_info_formatted, indent=4))
 
-    assert app_info_formatted["global_escrow_payment_1"] == 100000
-    assert app_info_formatted["global_escrow_payment_2"] == 100000
-    assert app_info_formatted["global_total_price"] == 200000
+    assert app_info_formatted["global_escrow_payment_1"] == 1000000
+    assert app_info_formatted["global_escrow_payment_2"] == 2000000
+    assert app_info_formatted["global_total_price"] == 3000000
     assert app_info_formatted["global_asa_id"] == config.stablecoin_ASA
     assert app_info_formatted["global_buyer_arbitration_flag"] == 0
 

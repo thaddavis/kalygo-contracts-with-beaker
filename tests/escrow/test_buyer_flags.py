@@ -72,7 +72,7 @@ def test_buyer_arbitration_flag(escrow_contract):
 
     c = Contract.from_json(js)
 
-    atc = AtomicTransactionComposer()
+    atc_1 = AtomicTransactionComposer()
     sp = algod_client.suggested_params()
 
     print("app_id:", app_id)
@@ -85,7 +85,7 @@ def test_buyer_arbitration_flag(escrow_contract):
 
     assert app_info_formatted["global_buyer_arbitration_flag"] == 0
 
-    atc.add_method_call(
+    atc_1.add_method_call(
         app_id,
         c.get_method_by_name("buyer_set_arbitration"),
         sender_address,
@@ -95,7 +95,7 @@ def test_buyer_arbitration_flag(escrow_contract):
     )
 
     # Execute Txn
-    atc.execute(algod_client, 2)
+    atc_1.execute(algod_client, 2)
 
     app_info = Algod.getClient().application_info(app_id)
     app_info_formatted = format_app_global_state(app_info["params"]["global-state"])

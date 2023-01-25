@@ -1,5 +1,6 @@
 from algosdk.future import transaction
 from algosdk.encoding import decode_address
+from datetime import datetime
 from pyteal import compileTeal, Mode
 from modules.helpers.time import get_current_timestamp, get_future_timestamp_in_secs
 from modules.helpers.utils import (
@@ -14,11 +15,6 @@ from beaker.application import Application
 from beaker.client.application_client import ApplicationClient
 from modules.clients.AlgodClient import Algod
 from algosdk.atomic_transaction_composer import AccountTransactionSigner
-
-local_ints = 0
-local_bytes = 0
-global_ints = 14
-global_bytes = 3
 
 
 def deploy_new(
@@ -56,29 +52,43 @@ def deploy_new(
         signer=signer,
     )
 
-    app_client.create(
+    # print("<- inspection_start ->", inspection_start)
+    # print(datetime.fromtimestamp(inspection_start), ":inspection_start:")
+    # print("<- inspection_end ->", inspection_end)
+    # print(datetime.fromtimestamp(inspection_end), ":inspection_end:")
+
+    res = app_client.create(
         global_creator=deployer_address,
         global_buyer=buyer_address,
         global_seller=seller_address,
-        global_escrow_payment_1=100000,
-        global_escrow_payment_2=100000,
-        global_total_price=200000,
-        global_inspection_start_date=int(get_current_timestamp()),
-        global_inspection_end_date=int(get_future_timestamp_in_secs(60)),
-        global_inspection_extension_date=int(get_future_timestamp_in_secs(120)),
-        global_moving_date=int(get_future_timestamp_in_secs(180)),
-        global_closing_date=int(get_future_timestamp_in_secs(240)),
-        global_free_funds_date=int(get_future_timestamp_in_secs(300)),
-        global_asa_id=12,
+        global_escrow_payment_1=escrow_payment_1,
+        global_escrow_payment_2=escrow_payment_2,
+        global_total_price=total_price,
+        global_inspection_start_date=inspection_start,
+        global_inspection_end_date=inspection_end,
+        global_inspection_extension_date=inspection_extension,
+        global_moving_date=moving_date,
+        global_closing_date=closing_date,
+        global_free_funds_date=free_funds_date,
+        global_asa_id=asa_id,
         note="cashBuy__v1.0.0",
     )
+
+    print("res[2] to get tx_id", res[2])
+
+    tx_id = res[2]
+    wait_for_confirmation(Algod.getClient(), tx_id)
+    # display results
+    transaction_response = Algod.getClient().pending_transaction_info(tx_id)
+    # print("transaction_response", transaction_response)
+    confirmed_round = transaction_response["confirmed-round"]
 
     print(f"deployed app_id: {app_client.app_id}")
     # print(f"Current app state: {app_client.get_application_state()}")
 
     return {
         "app_id": app_client.app_id,
-        # "confirmed_round": confirmed_round,
+        "confirmed_round": confirmed_round,
         "inspection_start": inspection_start,
         "inspection_end": inspection_end,
     }
