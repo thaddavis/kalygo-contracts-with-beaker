@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
-packages = [{include = "scripts"}]
+packages = [{include = "scripts"}, {include = "modules"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -14,6 +14,9 @@ beaker-pyteal = "^0.4.2"
 compile_with_beaker = "scripts.escrow.compile_with_beaker:main"
 deploy_with_beaker = "scripts.escrow.deploy_with_beaker:main"
 test_atc = "scripts.escrow.test_abi_method_with_atc:main"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.1"
 
 [build-system]
 requires = ["poetry-core"]

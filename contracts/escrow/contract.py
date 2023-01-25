@@ -149,9 +149,9 @@ class EscrowContract(Application):
     @external(authorize=guard_buyer_set_arbitration)
     def buyer_set_arbitration(self):
         return Seq(
-            If(self.global_buyer_pullout_flag == Int(0))  # type: ignore
+            If(self.global_buyer_arbitration_flag == Int(0))  # type: ignore
             .Then(
-                self.global_buyer_pullout_flag.set(Int(1)),  # type: ignore
+                self.global_buyer_arbitration_flag.set(Int(1)),  # type: ignore
                 Approve(),
             )
             .Else(Reject())
