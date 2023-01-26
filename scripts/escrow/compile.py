@@ -26,7 +26,9 @@ def main():
     #     client=sandbox.get_algod_client(), app=escrowContract, signer=signer
     # )
 
-    # print('deploying')
+    # print("escrowContract", escrowContract)
+
+    escrowContract.dump("./build")
 
     # app_client.create(global_buyer_pullout_flag=0)
     # print(f"Current app state: {app_client.get_application_state()}")
@@ -48,5 +50,5 @@ def main():
     # print(json.dumps(counterApp.contract.dictify()))
 
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()

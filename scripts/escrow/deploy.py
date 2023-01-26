@@ -18,8 +18,10 @@ def main():
     deployer_address = config.account_a_address
     deployer_mnemonic = config.account_a_mnemonic
 
-    buyer_address = config.account_b_address
-    seller_address = config.account_c_address
+    # buyer_address = config.account_b_address
+    # seller_address = config.account_c_address
+    buyer_address = config.account_a_address
+    seller_address = config.account_a_address
 
     deployer_private_key = get_private_key_from_mnemonic(deployer_mnemonic)
     signer = AccountTransactionSigner(deployer_private_key)
@@ -51,7 +53,11 @@ def main():
     )
 
     print(f"deployed app_id: {app_client.app_id}")
-    print(f"Current app state: {app_client.get_application_state()}")
+    print(
+        f"Current app state: {json.dumps(app_client.get_application_state(), indent=4)}"
+    )
+
+    # json.dumps(confirmed_txn, indent=4)))
     # app_client.call(escrowContract.increment)
     # print(f"Current app state: {app_client.get_application_state()}")
     # print("deleting...")

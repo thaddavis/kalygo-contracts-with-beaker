@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "getting-started"
+name = "kalygo_contracts"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
@@ -11,8 +11,8 @@ python = "^3.10"
 beaker-pyteal = "^0.4.2"
 
 [tool.poetry.scripts]
-compile_with_beaker = "scripts.escrow.compile_with_beaker:main"
-deploy_with_beaker = "scripts.escrow.deploy_with_beaker:main"
+compile = "scripts.escrow.compile:main"
+deploy = "scripts.escrow.deploy:main"
 test_atc = "scripts.escrow.test_abi_method_with_atc:main"
 print_ASA_holders = "scripts.escrow.print_ASA_holders:main"
 
