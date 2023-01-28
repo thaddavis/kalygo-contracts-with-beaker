@@ -30,9 +30,6 @@ class EscrowContract(Application):
     global_seller_arbitration_flag: ApplicationStateValue = ApplicationStateValue(
         stack_type=TealType.uint64, default=Int(0)
     )
-    global_stablecoin_issuer: ApplicationStateValue = ApplicationStateValue(
-        stack_type=TealType.bytes, default=Txn.sender()
-    )
     global_buyer: ApplicationStateValue = ApplicationStateValue(
         stack_type=TealType.bytes
     )
@@ -75,7 +72,6 @@ class EscrowContract(Application):
         self,
         global_buyer: abi.Address,
         global_seller: abi.Address,
-        global_stablecoin_issuer: abi.Address,
         global_escrow_payment_1: abi.Uint64,
         global_escrow_payment_2: abi.Uint64,
         global_total_price: abi.Uint64,
@@ -91,7 +87,6 @@ class EscrowContract(Application):
             self.initialize_application_state(),
             self.global_buyer.set(global_buyer.get()),  # type: ignore
             self.global_seller.set(global_seller.get()),  # type: ignore
-            self.global_stablecoin_issuer.set(global_stablecoin_issuer.get()),  # type: ignore
             self.global_asa_id.set(global_asa_id.get()),  # type: ignore
             If(
                 And(

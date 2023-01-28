@@ -31,6 +31,7 @@ def main():
     print("asset info: {}".format(json.dumps(asset_info, indent=4)))
 
     params = algod_client.suggested_params()
+
     txn = AssetConfigTxn(
         sender=manager_address,
         sp=params,

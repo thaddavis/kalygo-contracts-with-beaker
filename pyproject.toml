@@ -16,6 +16,7 @@ deploy = "scripts.escrow.deploy:main"
 test_atc = "scripts.escrow.test_abi_method_with_atc:main"
 print_ASA_holders = "scripts.escrow.print_ASA_holders:main"
 update_ASA_config = "scripts.escrow.update_ASA_config:main"
+xfer_ASA_to_account = "scripts.escrow.xfer_ASA_to_account:main"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"
