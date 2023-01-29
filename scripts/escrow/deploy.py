@@ -27,6 +27,7 @@ def main():
     signer = AccountTransactionSigner(deployer_private_key)
 
     escrowContract = EscrowContract()
+
     app_client = ApplicationClient(
         client=Algod().getClient(),
         app=escrowContract,

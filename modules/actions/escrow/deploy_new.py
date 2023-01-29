@@ -86,6 +86,9 @@ def deploy_new(
     print(f"deployed app_id: {app_client.app_id}")
     # print(f"Current app state: {app_client.get_application_state()}")
 
+    print("compiling and dumping contract ABI...")
+    escrowContract.dump("./build")
+
     return {
         "app_id": app_client.app_id,
         "confirmed_round": confirmed_round,

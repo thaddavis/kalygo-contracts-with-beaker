@@ -6,6 +6,7 @@ from pyteal.ast.bytes import Bytes
 from beaker.application import Application
 from beaker.client.application_client import ApplicationClient
 from beaker.decorators import external, create, delete, Authorize
+from beaker.lib.storage import Mapping, List
 from beaker import sandbox
 from beaker.state import ApplicationStateValue
 import json
@@ -19,7 +20,19 @@ from .constants import (
 )
 
 
+class SplitParty(abi.NamedTuple):
+    basis_points: abi.Field[abi.Uint8]
+    pk: abi.Field[abi.Address]
+
+
+class Note(abi.NamedTuple):
+    message: abi.Field[abi.String]
+
+
 class EscrowContract(Application):
+
+    buyer_metadata = Mapping(abi.String, Note)
+    seller_metadata = Mapping(abi.String, Note)
 
     global_buyer_pullout_flag: ApplicationStateValue = ApplicationStateValue(
         stack_type=TealType.uint64, default=Int(0)
@@ -131,6 +144,15 @@ class EscrowContract(Application):
     @delete
     def delete(self):
         return Approve()
+
+    @external
+    def add_key_to_buyer_note_box(self, key: abi.String, message: abi.String):
+        return Seq(
+            # self.seller_metadata[key.get()].set(value.get()),
+            (rec := Note()).set(message),
+            self.buyer_metadata[key.get()].set(rec),
+            Approve(),
+        )
 
     @Subroutine(TealType.uint64)
     def guard_buyer_set_arbitration(acct: Expr):
