@@ -1,16 +1,21 @@
 # localhost
 
-app_id = 65
+env = "TestNet"
+algod_url = "http://localhost:4001"
+algod_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+indexer_url = "http://localhost:8980"
+indexer_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+app_id = 71
 wallet_id = "wallet_QWEASD"
 wallet_phrase = ""
-account_a_address = "F2BLSIT7DMRXBVE6OT53U3UNTN7KAF36LW5AW6SOBKJSKTMCMXRATIU64A"
-account_a_mnemonic = "ill sell vicious erupt crack copper such deer success debris almost nation canyon course please kit supreme faith push nominee chaos drop unlock absorb save"
-account_b_address = "ZKIQWYJDSGGPX4W5BAWH5MRLAWLLRNXHKN262FWQIH3PVCNWPHKRVZATTM"
-account_b_mnemonic = "witness buddy hockey trumpet item meadow cup balance dice bind engine future similar improve uniform rate pause wall guitar supply demise side gas above fabric"
-account_c_address = "VLREUBCYOB247DM5CROEBL7PXWXKG36IAXQGFXCLGQEHVXWLBCX3LWMLPE"
-account_c_mnemonic = "capital inform fork leopard oppose spike hamster board physical survey private eyebrow submit tank auto letter rate snack push amazing tonight guard tube abstract civil"
+account_a_address = "YRRGGYPFQYUIKHTYCWL3V7FGMDNNVZ46QJKE6GQQDURQL3NIVUIUFQSXAY"
+account_a_mnemonic = "blood sea glass identify broken curve clever entry photo keep item gravity coin dish stomach enlist daughter caution unable time scan rebel story abstract state"
+account_b_address = "GMIW2YOFLL5BHWIRXL5QKVY7SEIQ3GZF3ZL5IK3SDTA4D4NNGTA22W7QBY"
+account_b_mnemonic = "melt virtual width scout century advance auction acquire mechanic kitchen crumble tomorrow blanket vivid dash kid toddler dog bread stereo domain swift sorry above beauty"
+account_c_address = "A3326WI7EK3RVOQ4JRZSLY3HO26JCVGT7HGU2RBBFAX3KOVG4XFA4XCTOQ"
+account_c_mnemonic = "device hour foster key rhythm worry able mom student fatal spread forest fresh nominee frown hedgehog medal wood balance hole solar accident place able soap"
 
-stablecoin_ASA = 12
+stablecoin_ASA = 23
 
 escrow_payment_1 = 1000000
 escrow_payment_2 = 2000000
@@ -19,6 +24,11 @@ enable_time_checks = True
 
 # MAINNET
 
+# env = "TestNet"
+# algod_url = "http://localhost:4001"
+# algod_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+# indexer_url = "http://localhost:8980"
+# indexer_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 # app_id = 339
 # wallet_id = "wallet_QWEASD"
 # wallet_phrase = "novel joy soldier speak vote book length screen broom job require agent garbage convince eight when oven federal dumb transfer mystery pulse similar ability senior"

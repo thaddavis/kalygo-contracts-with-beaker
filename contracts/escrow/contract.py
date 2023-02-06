@@ -1,6 +1,6 @@
 # type: ignore
 
-from typing import Final
+from typing import Final, Literal
 from pyteal import *
 from pyteal.ast.bytes import Bytes
 from beaker.application import Application
@@ -31,8 +31,8 @@ class Note(abi.NamedTuple):
 
 class EscrowContract(Application):
 
-    buyer_metadata = Mapping(abi.String, Note)
-    seller_metadata = Mapping(abi.String, Note)
+    buyer_metadata = Mapping(abi.String, abi.StaticBytes[Literal[1029]])
+    seller_metadata = Mapping(abi.String, abi.StaticBytes[Literal[1030]])
 
     global_buyer_pullout_flag: ApplicationStateValue = ApplicationStateValue(
         stack_type=TealType.uint64, default=Int(0)
@@ -146,11 +146,32 @@ class EscrowContract(Application):
         return Approve()
 
     @external
-    def add_key_to_buyer_note_box(self, key: abi.String, message: abi.String):
+    def edit_buyer_note_box(self, notes: abi.String):
         return Seq(
-            # self.seller_metadata[key.get()].set(value.get()),
-            (rec := Note()).set(message),
-            self.buyer_metadata[key.get()].set(rec),
+            self.buyer_metadata[Bytes("Buyer")].set(notes.get()),
+            Approve(),
+        )
+
+    @external
+    def delete_buyer_note_box(self):
+        result = App.box_delete(Bytes("Buyer"))
+        return Seq(
+            Assert(result == Int(1)),
+            Approve(),
+        )
+
+    @external
+    def edit_seller_note_box(self, notes: abi.String):
+        return Seq(
+            self.seller_metadata[Bytes("Seller")].set(notes.get()),
+            Approve(),
+        )
+
+    @external
+    def delete_seller_note_box(self):
+        result = App.box_delete(Bytes("Seller"))
+        return Seq(
+            Assert(result == Int(1)),
             Approve(),
         )
 
@@ -161,9 +182,7 @@ class EscrowContract(Application):
                 And(
                     Global.group_size() == Int(1),
                     App.globalGet(GLOBAL_BUYER) == acct,
-                    # self.global_buyer.get() == acct
                     Global.latest_timestamp() < App.globalGet(GLOBAL_CLOSING_DATE),
-                    # App.globalGet(GLOBAL_ENABLE_TIME_CHECKS) == Int(1)
                 ),
                 And(
                     Int(0)
