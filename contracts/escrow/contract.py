@@ -145,7 +145,18 @@ class EscrowContract(Application):
     def delete(self):
         return Approve()
 
-    @external
+    @Subroutine(TealType.uint64)
+    def guard_edit_buyer_note_box(acct: Expr):
+        return Seq(
+            Or(
+                And(
+                    App.globalGet(GLOBAL_BUYER) == acct,
+                    Global.latest_timestamp() < App.globalGet(GLOBAL_CLOSING_DATE),
+                )
+            )
+        )
+
+    @external(authorize=guard_edit_buyer_note_box)
     def edit_buyer_note_box(self, notes: abi.String):
         return Seq(
             self.buyer_metadata[Bytes("Buyer")].set(notes.get()),
