@@ -27,7 +27,7 @@ def withdraw_ASA_from_contract(
 
     atc.add_method_call(
         app_id,
-        abi.get_method_by_name("withdraw_ASA"),
+        abi.get_method_by_name("withdraw_escrow_balance"),
         sender,
         params,
         signer,

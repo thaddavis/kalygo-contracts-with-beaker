@@ -46,15 +46,15 @@ def escrow_contract():
     )
     yield deployed_contract["app_id"]
     print()
-    print("tear down in fixture", deployed_contract["app_id"])
-    delete_contract(
-        EscrowContract,
-        deployed_contract["app_id"],
-        config.account_a_mnemonic,
-    )
+    # print("tear down in fixture", deployed_contract["app_id"])
+    # delete_contract(
+    #     EscrowContract,
+    #     deployed_contract["app_id"],
+    #     config.account_a_mnemonic,
+    # )
 
 
-def test_buyer_arbitration_flag(escrow_contract):
+def test_edit_buyer_box(escrow_contract):
     app_id: int = escrow_contract
     app_info = Algod.getClient().application_info(app_id)
     app_info_formatted = format_app_global_state(app_info["params"]["global-state"])
@@ -122,12 +122,12 @@ def test_buyer_arbitration_flag(escrow_contract):
 
     atc_1.add_method_call(
         app_id,
-        c.get_method_by_name("add_key_to_buyer_note_box"),
+        c.get_method_by_name("edit_buyer_note_box"),
         sender_address,
         sp,
         signer,
-        method_args=["Realtor", "Gary Feinberg"],
-        boxes=[[app_id, "Realtor"]],  # type: ignore
+        method_args=["Realtor"],
+        boxes=[[app_id, "Buyer"]],  # type: ignore
     )
 
     # Execute Txn

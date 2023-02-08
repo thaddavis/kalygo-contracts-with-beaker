@@ -14,6 +14,7 @@ import json
 from .constants import (
     GLOBAL_CLOSING_DATE,
     GLOBAL_BUYER,
+    GLOBAL_FREE_FUNDS_DATE,
     GLOBAL_INSPECTION_END_DATE,
     GLOBAL_SELLER,
     GLOBAL_ASA_ID,
@@ -30,9 +31,10 @@ class Note(abi.NamedTuple):
 
 
 class EscrowContract(Application):
-
-    buyer_metadata = Mapping(abi.String, abi.StaticBytes[Literal[1029]])
-    seller_metadata = Mapping(abi.String, abi.StaticBytes[Literal[1030]])
+    # buyer_metadata = Mapping(abi.String, abi.StaticBytes[Literal[1029]])
+    # seller_metadata = Mapping(abi.String, abi.StaticBytes[Literal[1030]])
+    buyer_metadata = Mapping(abi.String, abi.StaticBytes[Literal[2049]])
+    seller_metadata = Mapping(abi.String, abi.StaticBytes[Literal[2050]])
 
     global_buyer_pullout_flag: ApplicationStateValue = ApplicationStateValue(
         stack_type=TealType.uint64, default=Int(0)
@@ -143,7 +145,11 @@ class EscrowContract(Application):
 
     @delete
     def delete(self):
-        return Approve()
+        return (
+            If(Balance(Global.current_application_address()) == Int(0))
+            .Then(Approve())
+            .Else(Reject())
+        )
 
     @Subroutine(TealType.uint64)
     def guard_edit_buyer_note_box(acct: Expr):
@@ -151,7 +157,7 @@ class EscrowContract(Application):
             Or(
                 And(
                     App.globalGet(GLOBAL_BUYER) == acct,
-                    Global.latest_timestamp() < App.globalGet(GLOBAL_CLOSING_DATE),
+                    Global.latest_timestamp() < App.globalGet(GLOBAL_FREE_FUNDS_DATE),
                 )
             )
         )
@@ -163,12 +169,27 @@ class EscrowContract(Application):
             Approve(),
         )
 
-    @external
+    @Subroutine(TealType.uint64)
+    def guard_delete_buyer_note_box(acct: Expr):
+        return Seq(Or(And(App.globalGet(GLOBAL_BUYER) == acct)))
+
+    @external(authorize=guard_delete_buyer_note_box)
     def delete_buyer_note_box(self):
         result = App.box_delete(Bytes("Buyer"))
         return Seq(
             Assert(result == Int(1)),
             Approve(),
+        )
+
+    @Subroutine(TealType.uint64)
+    def guard_edit_seller_note_box(acct: Expr):
+        return Seq(
+            Or(
+                And(
+                    App.globalGet(GLOBAL_SELLER) == acct,
+                    Global.latest_timestamp() < App.globalGet(GLOBAL_FREE_FUNDS_DATE),
+                )
+            )
         )
 
     @external
@@ -177,6 +198,10 @@ class EscrowContract(Application):
             self.seller_metadata[Bytes("Seller")].set(notes.get()),
             Approve(),
         )
+
+    @Subroutine(TealType.uint64)
+    def guard_delete_seller_note_box(acct: Expr):
+        return Seq(Or(And(App.globalGet(GLOBAL_SELLER) == acct)))
 
     @external
     def delete_seller_note_box(self):
