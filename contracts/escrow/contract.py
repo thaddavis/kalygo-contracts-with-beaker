@@ -11,14 +11,10 @@ from beaker import sandbox
 from beaker.state import ApplicationStateValue
 import json
 
-from .constants import (
-    GLOBAL_CLOSING_DATE,
-    GLOBAL_BUYER,
-    GLOBAL_FREE_FUNDS_DATE,
-    GLOBAL_INSPECTION_END_DATE,
-    GLOBAL_SELLER,
-    GLOBAL_ASA_ID,
-)
+from .constants import *
+
+from .guards.guard_withdraw_escrow_balance import guard_withdraw_escrow_balance
+from .guards.guard_buyer_set_arbitration import guard_buyer_set_arbitration
 
 
 class SplitParty(abi.NamedTuple):
@@ -211,21 +207,6 @@ class EscrowContract(Application):
             Approve(),
         )
 
-    @Subroutine(TealType.uint64)
-    def guard_buyer_set_arbitration(acct: Expr):
-        return Seq(
-            Or(
-                And(
-                    Global.group_size() == Int(1),
-                    App.globalGet(GLOBAL_BUYER) == acct,
-                    Global.latest_timestamp() < App.globalGet(GLOBAL_CLOSING_DATE),
-                ),
-                And(
-                    Int(0)
-                ),  # TODO CHECK IF OTHER PARTY HAS RAISED ARBITRATION IN WHICH CASE ALLOW EXTENSION TO RAISE ARB FLAG
-            )
-        )
-
     @external(authorize=guard_buyer_set_arbitration)
     def buyer_set_arbitration(self):
         return Seq(
@@ -320,15 +301,6 @@ class EscrowContract(Application):
         return Seq(
             self.global_seller_arbitration_flag.set(Int(1)),
             Approve(),
-        )
-
-    @Subroutine(TealType.uint64)
-    def guard_withdraw_escrow_balance(acct: Expr):
-        return Seq(
-            Or(
-                App.globalGet(GLOBAL_SELLER) == Txn.sender(),
-                App.globalGet(GLOBAL_BUYER) == Txn.sender(),
-            )
         )
 
     @external(authorize=guard_withdraw_escrow_balance)
