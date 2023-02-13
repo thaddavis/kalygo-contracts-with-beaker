@@ -4,16 +4,15 @@ from ..constants import *
 
 
 @Subroutine(TealType.uint64)
-def guard_buyer_set_arbitration(acct: Expr):
+def guard_seller_set_arbitration(acct: Expr):
     return Seq(
         Or(
             And(
-                Global.group_size() == Int(1),
-                App.globalGet(GLOBAL_BUYER) == acct,
+                App.globalGet(GLOBAL_SELLER) == Txn.sender(),
                 Global.latest_timestamp() < App.globalGet(GLOBAL_CLOSING_DATE),
             ),
             And(
                 Int(0)
-            ),  # TODO CHECK IF OTHER PARTY HAS RAISED ARBITRATION IN WHICH CASE ALLOW EXTENSION TO RAISE ARB FLAG
+            ),  # CHECK IF OTHER PARTY HAS RAISED ARBITRATION IN WHICH CASE ALLOW EXTENSION TO RAISE ARB FLAG
         )
     )

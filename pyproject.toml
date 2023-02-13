@@ -13,6 +13,7 @@ beaker-pyteal = "^0.4.2"
 [tool.poetry.scripts]
 compile = "scripts.escrow.compile:main"
 deploy = "scripts.escrow.deploy:main"
+update = "scripts.escrow.update:main"
 test_atc = "scripts.escrow.test_abi_method_with_atc:main"
 print_ASA_holders = "scripts.escrow.print_ASA_holders:main"
 update_ASA_config = "scripts.escrow.update_ASA_config:main"

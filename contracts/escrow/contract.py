@@ -5,7 +5,7 @@ from pyteal import *
 from pyteal.ast.bytes import Bytes
 from beaker.application import Application
 from beaker.client.application_client import ApplicationClient
-from beaker.decorators import external, create, delete, Authorize
+from beaker.decorators import external, create, delete, Authorize, update
 from beaker.lib.storage import Mapping, List
 from beaker import sandbox
 from beaker.state import ApplicationStateValue
@@ -14,22 +14,30 @@ import json
 from .constants import *
 
 from .guards.guard_withdraw_escrow_balance import guard_withdraw_escrow_balance
+from .guards.guard_withdraw_balance import guard_withdraw_balance
 from .guards.guard_buyer_set_arbitration import guard_buyer_set_arbitration
+from .guards.guard_delete_buyer_note_box import guard_delete_buyer_note_box
+from .guards.guard_edit_buyer_note_box import guard_edit_buyer_note_box
+from .guards.guard_delete_seller_note_box import guard_delete_seller_note_box
+from .guards.guard_edit_seller_note_box import guard_edit_seller_note_box
+from .guards.guard_buyer_set_pullout import guard_buyer_set_pullout
+from .guards.guard_optin_to_ASA import guard_optin_to_ASA
+from .guards.guard_optout_from_ASA import guard_optout_from_ASA
+from .guards.guard_seller_set_arbitration import guard_seller_set_arbitration
 
 
-class SplitParty(abi.NamedTuple):
-    basis_points: abi.Field[abi.Uint8]
-    pk: abi.Field[abi.Address]
+# class SplitParty(abi.NamedTuple):
+#     basis_points: abi.Field[abi.Uint8]
+#     pk: abi.Field[abi.Address]
 
 
-class Note(abi.NamedTuple):
-    message: abi.Field[abi.String]
+# class Note(abi.NamedTuple):
+#     message: abi.Field[abi.String]
 
 
 class EscrowContract(Application):
-    # buyer_metadata = Mapping(abi.String, abi.StaticBytes[Literal[1029]])
-    # seller_metadata = Mapping(abi.String, abi.StaticBytes[Literal[1030]])
     buyer_metadata = Mapping(abi.String, abi.StaticBytes[Literal[2049]])
+
     seller_metadata = Mapping(abi.String, abi.StaticBytes[Literal[2050]])
 
     global_buyer_pullout_flag: ApplicationStateValue = ApplicationStateValue(
@@ -96,9 +104,9 @@ class EscrowContract(Application):
     ):
         return Seq(
             self.initialize_application_state(),
-            self.global_buyer.set(global_buyer.get()),  # type: ignore
-            self.global_seller.set(global_seller.get()),  # type: ignore
-            self.global_asa_id.set(global_asa_id.get()),  # type: ignore
+            self.global_buyer.set(global_buyer.get()),
+            self.global_seller.set(global_seller.get()),
+            self.global_asa_id.set(global_asa_id.get()),
             If(
                 And(
                     global_escrow_payment_1.get() >= Int(100000),  # escrow 1 uint64
@@ -109,9 +117,9 @@ class EscrowContract(Application):
             )
             .Then(
                 Seq(
-                    self.global_escrow_payment_1.set(global_escrow_payment_1.get()),  # type: ignore
-                    self.global_escrow_payment_2.set(global_escrow_payment_2.get()),  # type: ignore
-                    self.global_total_price.set(global_total_price.get()),  # type: ignore
+                    self.global_escrow_payment_1.set(global_escrow_payment_1.get()),
+                    self.global_escrow_payment_2.set(global_escrow_payment_2.get()),
+                    self.global_total_price.set(global_total_price.get()),
                 )
             )
             .Else(Reject()),
@@ -139,23 +147,16 @@ class EscrowContract(Application):
             .Else(Reject()),
         )
 
+    @update
+    def update(self):
+        return Reject()  # Approve() for testing tho is nice : )
+
     @delete
     def delete(self):
         return (
             If(Balance(Global.current_application_address()) == Int(0))
             .Then(Approve())
             .Else(Reject())
-        )
-
-    @Subroutine(TealType.uint64)
-    def guard_edit_buyer_note_box(acct: Expr):
-        return Seq(
-            Or(
-                And(
-                    App.globalGet(GLOBAL_BUYER) == acct,
-                    Global.latest_timestamp() < App.globalGet(GLOBAL_FREE_FUNDS_DATE),
-                )
-            )
         )
 
     @external(authorize=guard_edit_buyer_note_box)
@@ -165,10 +166,6 @@ class EscrowContract(Application):
             Approve(),
         )
 
-    @Subroutine(TealType.uint64)
-    def guard_delete_buyer_note_box(acct: Expr):
-        return Seq(Or(And(App.globalGet(GLOBAL_BUYER) == acct)))
-
     @external(authorize=guard_delete_buyer_note_box)
     def delete_buyer_note_box(self):
         result = App.box_delete(Bytes("Buyer"))
@@ -177,29 +174,14 @@ class EscrowContract(Application):
             Approve(),
         )
 
-    @Subroutine(TealType.uint64)
-    def guard_edit_seller_note_box(acct: Expr):
-        return Seq(
-            Or(
-                And(
-                    App.globalGet(GLOBAL_SELLER) == acct,
-                    Global.latest_timestamp() < App.globalGet(GLOBAL_FREE_FUNDS_DATE),
-                )
-            )
-        )
-
-    @external
+    @external(authorize=guard_edit_seller_note_box)
     def edit_seller_note_box(self, notes: abi.String):
         return Seq(
             self.seller_metadata[Bytes("Seller")].set(notes.get()),
             Approve(),
         )
 
-    @Subroutine(TealType.uint64)
-    def guard_delete_seller_note_box(acct: Expr):
-        return Seq(Or(And(App.globalGet(GLOBAL_SELLER) == acct)))
-
-    @external
+    @external(authorize=guard_delete_seller_note_box)
     def delete_seller_note_box(self):
         result = App.box_delete(Bytes("Seller"))
         return Seq(
@@ -214,28 +196,11 @@ class EscrowContract(Application):
             Approve(),
         )
 
-    @Subroutine(TealType.uint64)
-    def guard_buyer_set_pullout(acct: Expr):
-        return Seq(
-            And(
-                App.globalGet(GLOBAL_BUYER) == Txn.sender(),
-                Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_END_DATE),
-            )
-        )
-
     @external(authorize=guard_buyer_set_pullout)
     def buyer_set_pullout(self):
         return Seq(
             self.global_buyer_pullout_flag.set(Int(1)),
             Approve(),
-        )
-
-    @Subroutine(TealType.uint64)
-    def guard_optin_to_ASA(acct: Expr):
-        return Seq(
-            And(
-                Txn.sender() == App.globalGet(GLOBAL_BUYER),
-            )
         )
 
     @external(authorize=guard_optin_to_ASA)
@@ -258,10 +223,6 @@ class EscrowContract(Application):
             ]
         )
 
-    @Subroutine(TealType.uint64)
-    def guard_optout_from_ASA(acct: Expr):
-        return Seq(Int(1))
-
     @external(authorize=guard_optout_from_ASA)
     def optout_from_ASA(self):
         return Seq(
@@ -280,20 +241,6 @@ class EscrowContract(Application):
                 InnerTxnBuilder.Submit(),
                 Approve(),
             ]
-        )
-
-    @Subroutine(TealType.uint64)
-    def guard_seller_set_arbitration(acct: Expr):
-        return Seq(
-            Or(
-                And(
-                    App.globalGet(GLOBAL_SELLER) == Txn.sender(),
-                    Global.latest_timestamp() < App.globalGet(GLOBAL_CLOSING_DATE),
-                ),
-                And(
-                    Int(0)
-                ),  # CHECK IF OTHER PARTY HAS RAISED ARBITRATION IN WHICH CASE ALLOW EXTENSION TO RAISE ARB FLAG
-            )
         )
 
     @external(authorize=guard_seller_set_arbitration)
@@ -328,15 +275,6 @@ class EscrowContract(Application):
                 InnerTxnBuilder.Submit(),
                 Approve(),
             ]
-        )
-
-    @Subroutine(TealType.uint64)
-    def guard_withdraw_balance(acct: Expr):
-        return Seq(
-            Or(
-                App.globalGet(GLOBAL_BUYER) == Txn.sender(),
-                App.globalGet(GLOBAL_SELLER) == Txn.sender(),
-            )
         )
 
     @external(authorize=guard_withdraw_balance)
