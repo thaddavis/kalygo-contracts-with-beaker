@@ -19,6 +19,7 @@ print_ASA_holders = "scripts.escrow.print_ASA_holders:main"
 update_ASA_config = "scripts.escrow.update_ASA_config:main"
 xfer_ASA_to_account = "scripts.escrow.xfer_ASA_to_account:main"
 clawback_ASA = "scripts.escrow.clawback_ASA:main"
+update_contract = "scripts.escrow.update_contract:main"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"

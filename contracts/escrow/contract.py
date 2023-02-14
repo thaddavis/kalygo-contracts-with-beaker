@@ -30,9 +30,16 @@ from .guards.guard_seller_set_arbitration import guard_seller_set_arbitration
 #     basis_points: abi.Field[abi.Uint8]
 #     pk: abi.Field[abi.Address]
 
-
 # class Note(abi.NamedTuple):
 #     message: abi.Field[abi.String]
+
+
+class ContractUpdate(abi.NamedTuple):
+    buyer_address: abi.Field[abi.Address]
+    seller_address: abi.Field[abi.Address]
+    global_escrow_payment_1: abi.Field[abi.Uint64]
+    global_escrow_payment_2: abi.Field[abi.Uint64]
+    global_total_price: abi.Field[abi.Uint64]
 
 
 class EscrowContract(Application):
@@ -49,6 +56,11 @@ class EscrowContract(Application):
     global_seller_arbitration_flag: ApplicationStateValue = ApplicationStateValue(
         stack_type=TealType.uint64, default=Int(0)
     )
+    # contract_update
+    global_seller_contract_update: ApplicationStateValue = ApplicationStateValue(
+        stack_type=TealType.bytes
+    )
+
     global_buyer: ApplicationStateValue = ApplicationStateValue(
         stack_type=TealType.bytes
     )
@@ -297,3 +309,35 @@ class EscrowContract(Application):
                 Approve(),
             ]
         )
+
+    # @external()
+    # def buyer_request_contract_update():
+    #     return Seq(
+    #         self.global_seller_arbitration_flag.set(Int(1)),
+    #         Approve(),
+    #     )
+
+    @external()
+    def seller_request_contract_update(
+        self,
+        global_buyer: abi.Address,
+        global_seller: abi.Address,
+        global_escrow_payment_1: abi.Uint64,
+        global_escrow_payment_2: abi.Uint64,
+        global_total_price: abi.Uint64,
+    ):
+        return Seq(
+            (rec := ContractUpdate()).set(
+                global_buyer,
+                global_seller,
+                global_escrow_payment_1,
+                global_escrow_payment_2,
+                global_total_price,
+            ),
+            self.global_seller_contract_update.set(rec.encode()),
+            Approve(),
+        )
+
+    # @external()
+    # def get_seller_requested_contract_update(self, *, output: ContractUpdate):
+    #     return output.decode(self.global_seller_contract_update.get())
