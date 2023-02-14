@@ -37,9 +37,9 @@ from .guards.guard_seller_set_arbitration import guard_seller_set_arbitration
 class ContractUpdate(abi.NamedTuple):
     buyer_address: abi.Field[abi.Address]
     seller_address: abi.Field[abi.Address]
-    global_escrow_payment_1: abi.Field[abi.Uint64]
-    global_escrow_payment_2: abi.Field[abi.Uint64]
-    global_total_price: abi.Field[abi.Uint64]
+    escrow_payment_1: abi.Field[abi.Uint64]
+    escrow_payment_2: abi.Field[abi.Uint64]
+    total_price: abi.Field[abi.Uint64]
 
 
 class EscrowContract(Application):
@@ -56,8 +56,13 @@ class EscrowContract(Application):
     global_seller_arbitration_flag: ApplicationStateValue = ApplicationStateValue(
         stack_type=TealType.uint64, default=Int(0)
     )
-    # contract_update
-    global_seller_contract_update: ApplicationStateValue = ApplicationStateValue(
+
+    # stores proposed contract_update
+    global_buyer_update: ApplicationStateValue = ApplicationStateValue(
+        stack_type=TealType.bytes
+    )
+    # stores proposed contract_update
+    global_seller_update: ApplicationStateValue = ApplicationStateValue(
         stack_type=TealType.bytes
     )
 
@@ -310,15 +315,8 @@ class EscrowContract(Application):
             ]
         )
 
-    # @external()
-    # def buyer_request_contract_update():
-    #     return Seq(
-    #         self.global_seller_arbitration_flag.set(Int(1)),
-    #         Approve(),
-    #     )
-
     @external()
-    def seller_request_contract_update(
+    def buyer_request_contract_update(
         self,
         global_buyer: abi.Address,
         global_seller: abi.Address,
@@ -334,10 +332,54 @@ class EscrowContract(Application):
                 global_escrow_payment_2,
                 global_total_price,
             ),
-            self.global_seller_contract_update.set(rec.encode()),
+            self.global_buyer_update.set(rec.encode()),
             Approve(),
         )
 
-    # @external()
-    # def get_seller_requested_contract_update(self, *, output: ContractUpdate):
-    #     return output.decode(self.global_seller_contract_update.get())
+    @external()
+    def seller_request_contract_update(
+        self,
+        buyer: abi.Address,
+        seller: abi.Address,
+        escrow_payment_1: abi.Uint64,
+        escrow_payment_2: abi.Uint64,
+        total_price: abi.Uint64,
+    ):
+        return Seq(
+            If(
+                And(
+                    self.global_buyer_update.decode(
+                        self.global_buyer_update.get()
+                    ).buyer
+                    == buyer.get(),
+                    # self.global_buyer_update.decode().seller == seller.get(),
+                    # self.global_buyer_update.decode().escrow_payment_1
+                    # == escrow_payment_1.get(),
+                    # self.global_buyer_update.decode().escrow_payment_2
+                    # == escrow_payment_2.get(),
+                    # self.global_buyer_update.decode().total_price == total_price.get(),
+                )
+            )
+            .Then(
+                Seq(
+                    self.global_buyer.set(buyer.get()),
+                    self.global_seller.set(seller.get()),
+                    self.global_escrow_payment_1.set(escrow_payment_1.get()),
+                    self.global_escrow_payment_2.set(escrow_payment_2.get()),
+                    self.global_total_price.set(total_price.get()),
+                )
+            )
+            .Else(
+                Seq(
+                    (rec := ContractUpdate()).set(
+                        buyer,
+                        seller,
+                        escrow_payment_1,
+                        escrow_payment_2,
+                        total_price,
+                    ),
+                    self.global_seller_update.set(rec.encode()),
+                )
+            ),
+            Approve(),
+        )
