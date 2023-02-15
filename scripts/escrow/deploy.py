@@ -37,19 +37,19 @@ def main():
     print("deploying")
 
     app_client.create(
-        global_creator=deployer_address,
-        global_buyer=buyer_address,
-        global_seller=seller_address,
-        global_escrow_payment_1=100000,
-        global_escrow_payment_2=100000,
-        global_total_price=200000,
-        global_inspection_start_date=int(get_current_timestamp()),
-        global_inspection_end_date=int(get_future_timestamp_in_secs(60)),
-        global_inspection_extension_date=int(get_future_timestamp_in_secs(120)),
-        global_moving_date=int(get_future_timestamp_in_secs(180)),
-        global_closing_date=int(get_future_timestamp_in_secs(240)),
-        global_free_funds_date=int(get_future_timestamp_in_secs(300)),
-        global_asa_id=12,
+        glbl_creator=deployer_address,
+        glbl_buyer=buyer_address,
+        glbl_seller=seller_address,
+        glbl_escrow_payment_1=100000,
+        glbl_escrow_payment_2=100000,
+        glbl_total_price=200000,
+        glbl_inspection_start_date=int(get_current_timestamp()),
+        glbl_inspection_end_date=int(get_future_timestamp_in_secs(60)),
+        glbl_inspection_extension_date=int(get_future_timestamp_in_secs(120)),
+        glbl_moving_date=int(get_future_timestamp_in_secs(180)),
+        glbl_closing_date=int(get_future_timestamp_in_secs(240)),
+        glbl_free_funds_date=int(get_future_timestamp_in_secs(300)),
+        glbl_asa_id=12,
         note="cashBuy__v1.0.0",
     )
 

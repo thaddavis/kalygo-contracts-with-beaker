@@ -118,7 +118,7 @@ def test_edit_buyer_box(escrow_contract):
     print("-=-")
     print(json.dumps(app_info_formatted, indent=4))
     print("-=-")
-    # assert app_info_formatted["global_buyer_arbitration_flag"] == 0
+    # assert app_info_formatted["glbl_buyer_arbitration_flag"] == 0
 
     atc_1.add_method_call(
         app_id,

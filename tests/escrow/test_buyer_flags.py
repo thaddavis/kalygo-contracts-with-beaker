@@ -83,7 +83,7 @@ def test_buyer_arbitration_flag(escrow_contract):
     app_info_formatted = format_app_global_state(app_info["params"]["global-state"])
     # print(json.dumps(app_info_formatted, indent=4))
 
-    assert app_info_formatted["global_buyer_arbitration_flag"] == 0
+    assert app_info_formatted["glbl_buyer_arbitration_flag"] == 0
 
     atc_1.add_method_call(
         app_id,
@@ -101,8 +101,8 @@ def test_buyer_arbitration_flag(escrow_contract):
     app_info_formatted = format_app_global_state(app_info["params"]["global-state"])
     # print(json.dumps(app_info_formatted, indent=4))
 
-    assert app_info_formatted["global_buyer_arbitration_flag"] == 1
-    assert app_info_formatted["global_buyer_pullout_flag"] == 0
+    assert app_info_formatted["glbl_buyer_arbitration_flag"] == 1
+    assert app_info_formatted["glbl_buyer_pullout_flag"] == 0
 
     atc_2 = AtomicTransactionComposer()
 
@@ -121,4 +121,4 @@ def test_buyer_arbitration_flag(escrow_contract):
     app_info = Algod.getClient().application_info(app_id)
     app_info_formatted = format_app_global_state(app_info["params"]["global-state"])
 
-    assert app_info_formatted["global_buyer_pullout_flag"] == 1
+    assert app_info_formatted["glbl_buyer_pullout_flag"] == 1
