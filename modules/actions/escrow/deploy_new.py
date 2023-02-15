@@ -58,19 +58,19 @@ def deploy_new(
     # print(datetime.fromtimestamp(inspection_end), ":inspection_end:")
 
     res = app_client.create(
-        global_creator=deployer_address,
-        global_buyer=buyer_address,
-        global_seller=seller_address,
-        global_escrow_payment_1=escrow_payment_1,
-        global_escrow_payment_2=escrow_payment_2,
-        global_total_price=total_price,
-        global_inspection_start_date=inspection_start,
-        global_inspection_end_date=inspection_end,
-        global_inspection_extension_date=inspection_extension,
-        global_moving_date=moving_date,
-        global_closing_date=closing_date,
-        global_free_funds_date=free_funds_date,
-        global_asa_id=asa_id,
+        glbl_creator=deployer_address,
+        glbl_buyer=buyer_address,
+        glbl_seller=seller_address,
+        glbl_escrow_1=escrow_payment_1,
+        glbl_escrow_2=escrow_payment_2,
+        glbl_total_price=total_price,
+        glbl_inspect_start_date=inspection_start,
+        glbl_inspect_end_date=inspection_end,
+        glbl_inspect_extension_date=inspection_extension,
+        glbl_moving_date=moving_date,
+        glbl_closing_date=closing_date,
+        glbl_free_funds_date=free_funds_date,
+        glbl_asa_id=asa_id,
         note="cashBuy__v1.0.0",
     )
 

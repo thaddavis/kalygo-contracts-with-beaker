@@ -52,11 +52,11 @@ def test_initial_state(escrow_contract):
     app_info_formatted = format_app_global_state(app_info["params"]["global-state"])
     print(json.dumps(app_info_formatted, indent=4))
 
-    assert app_info_formatted["global_escrow_payment_1"] == 1000000
-    assert app_info_formatted["global_escrow_payment_2"] == 2000000
-    assert app_info_formatted["global_total_price"] == 3000000
-    assert app_info_formatted["global_asa_id"] == config.stablecoin_ASA
-    assert app_info_formatted["global_buyer_arbitration_flag"] == 0
+    assert app_info_formatted["glbl_escrow_payment_1"] == 1000000
+    assert app_info_formatted["glbl_escrow_payment_2"] == 2000000
+    assert app_info_formatted["glbl_total_price"] == 3000000
+    assert app_info_formatted["glbl_asa_id"] == config.stablecoin_ASA
+    assert app_info_formatted["glbl_buyer_arbitration_flag"] == 0
 
     app_address = logic.get_application_address(app_id)
     res = Algod.getClient().account_info(app_address)

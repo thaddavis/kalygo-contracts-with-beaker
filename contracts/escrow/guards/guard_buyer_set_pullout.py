@@ -8,6 +8,6 @@ def guard_buyer_set_pullout(acct: Expr):
     return Seq(
         And(
             App.globalGet(GLOBAL_BUYER) == Txn.sender(),
-            Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECTION_END_DATE),
+            Global.latest_timestamp() < App.globalGet(GLOBAL_INSPECT_END_DATE),
         )
     )

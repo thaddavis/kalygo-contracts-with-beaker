@@ -63,10 +63,10 @@ def test_buyer_pullout(escrow_contract):
     app_info_formatted = format_app_global_state(app_info["params"]["global-state"])
     print()
     print(
-        '"global_buyer_pullout_flag"',
-        app_info_formatted["global_buyer_pullout_flag"],
+        '"glbl_buyer_pullout_flag"',
+        app_info_formatted["glbl_buyer_pullout_flag"],
     )
-    assert app_info_formatted["global_buyer_pullout_flag"] == 0
+    assert app_info_formatted["glbl_buyer_pullout_flag"] == 0
 
     #
     # onchain_timestamp = algod_client.block_info(confirmed_round)["block"]["ts"]
@@ -103,10 +103,10 @@ def test_buyer_pullout(escrow_contract):
     app_info_formatted = format_app_global_state(app_info["params"]["global-state"])
     print()
     print(
-        '"global_buyer_pullout_flag"',
-        app_info_formatted["global_buyer_pullout_flag"],
+        '"glbl_buyer_pullout_flag"',
+        app_info_formatted["glbl_buyer_pullout_flag"],
     )
-    assert app_info_formatted["global_buyer_pullout_flag"] == 1
+    assert app_info_formatted["glbl_buyer_pullout_flag"] == 1
 
 
 def teardown_module(module):
