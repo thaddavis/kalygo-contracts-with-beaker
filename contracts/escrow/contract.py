@@ -35,10 +35,10 @@ from .guards.guard_seller_set_arbitration import guard_seller_set_arbitration
 
 
 class ContractUpdate(abi.NamedTuple):
-    buyer_address: abi.Field[abi.Address]
-    seller_address: abi.Field[abi.Address]
-    escrow_payment_1: abi.Field[abi.Uint64]
-    escrow_payment_2: abi.Field[abi.Uint64]
+    buyer: abi.Field[abi.Address]
+    seller: abi.Field[abi.Address]
+    escrow_1: abi.Field[abi.Uint64]
+    escrow_2: abi.Field[abi.Uint64]
     total_price: abi.Field[abi.Uint64]
 
 
@@ -346,18 +346,19 @@ class EscrowContract(Application):
         total_price: abi.Uint64,
     ):
         return Seq(
+            (rec := ContractUpdate()).decode(self.global_buyer_update.get()),
+            (rec_buyer := abi.Address()).set(rec.buyer),
+            (rec_seller := abi.Address()).set(rec.seller),
+            (rec_escrow_1 := abi.Uint64()).set(rec.escrow_1),
+            (rec_escrow_2 := abi.Uint64()).set(rec.escrow_2),
+            (rec_total_price := abi.Uint64()).set(rec.total_price),
             If(
                 And(
-                    self.global_buyer_update.decode(
-                        self.global_buyer_update.get()
-                    ).buyer
-                    == buyer.get(),
-                    # self.global_buyer_update.decode().seller == seller.get(),
-                    # self.global_buyer_update.decode().escrow_payment_1
-                    # == escrow_payment_1.get(),
-                    # self.global_buyer_update.decode().escrow_payment_2
-                    # == escrow_payment_2.get(),
-                    # self.global_buyer_update.decode().total_price == total_price.get(),
+                    rec_buyer.get() == buyer.get(),
+                    rec_seller.get() == seller.get(),
+                    rec_escrow_1.get() == escrow_payment_1.get(),
+                    rec_escrow_2.get() == escrow_payment_2.get(),
+                    rec_total_price.get() == total_price.get(),
                 )
             )
             .Then(
