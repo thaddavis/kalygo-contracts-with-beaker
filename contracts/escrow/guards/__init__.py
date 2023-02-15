@@ -9,3 +9,5 @@ from .guard_optout_from_ASA import guard_optout_from_ASA
 from .guard_seller_set_arbitration import guard_seller_set_arbitration
 from .guard_withdraw_balance import guard_withdraw_balance
 from .guard_withdraw_escrow_balance import guard_withdraw_escrow_balance
+from .guard_buyer_request_contract_update import guard_buyer_request_contract_update
+from .guard_seller_request_contract_update import guard_seller_request_contract_update
