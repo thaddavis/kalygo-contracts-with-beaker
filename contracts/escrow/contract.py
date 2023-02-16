@@ -430,22 +430,24 @@ class EscrowContract(Application):
         closing_date: abi.Uint64,
         free_funds_date: abi.Uint64,
     ):
-        rec_o_party = Seq(
+        rec_o_party = (
             If(App.globalGet(GLOBAL_BUYER) == Txn.sender())
             .Then(
                 Seq(
-                    (rec_o_party_tmp := ContractUpdate()).decode(
+                    # (rec_o_party_tmp := ContractUpdate()).decode(
+                    (ContractUpdate()).decode(
                         self.glbl_slr_update.get()
                     ),  # Get other party proposed revision
-                    rec_o_party_tmp,
+                    #     Return(rec_o_party_tmp),
                 ),
             )
             .Else(
                 Seq(
-                    (rec_o_party_tmp := ContractUpdate()).decode(
+                    # (rec_o_party_tmp := ContractUpdate()).decode(
+                    (ContractUpdate()).decode(
                         self.glbl_byr_update.get()
                     ),  # Get other party proposed revision
-                    rec_o_party_tmp,
+                    #     Return(rec_o_party_tmp),
                 ),
             )
         )
