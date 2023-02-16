@@ -430,24 +430,24 @@ class EscrowContract(Application):
         closing_date: abi.Uint64,
         free_funds_date: abi.Uint64,
     ):
-        rec_o_party = (
-            Cond(
-                [
-                    App.globalGet(GLOBAL_BUYER) == Txn.sender(),
-                    (rec_o_party_tmp := ContractUpdate()).decode(
-                        # self.glbl_slr_update.get()
-                        self.glbl_slr_update.get()
-                    ),
-                ],
-                [
-                    App.globalGet(GLOBAL_SELLER) == Txn.sender(),
-                    (rec_o_party_tmp := ContractUpdate()).decode(
-                        # self.glbl_slr_update.get()
-                        self.glbl_byr_update.get()
-                    ),
-                ],
-            ),
-        )
+        # rec_o_party = (
+        #     Cond(
+        #         [
+        #             App.globalGet(GLOBAL_BUYER) == Txn.sender(),
+        #             (rec_o_party_tmp := ContractUpdate()).decode(
+        #                 # self.glbl_slr_update.get()
+        #                 self.glbl_slr_update.get()
+        #             ),
+        #         ],
+        #         [
+        #             App.globalGet(GLOBAL_SELLER) == Txn.sender(),
+        #             (rec_o_party_tmp := ContractUpdate()).decode(
+        #                 # self.glbl_slr_update.get()
+        #                 self.glbl_byr_update.get()
+        #             ),
+        #         ],
+        #     ),
+        # )
         # (rec_o_party := ContractUpdate()).decode(
         #     # self.glbl_slr_update.get()
         #     self.glbl_slr_update
@@ -457,21 +457,57 @@ class EscrowContract(Application):
         #     # self.glbl_byr_update.get()
         #     self.glbl_byr_update
         # )  # Get other party proposed revision
-        # If(App.globalGet(GLOBAL_BUYER) == Txn.sender())
-        # .Then(
-        #     # (rec_o_party_tmp := ContractUpdate()).decode(
-        #     (ContractUpdate()).decode(
-        #         self.glbl_slr_update.get()
-        #     ),  # Get other party proposed revision
-        #     #     Return(rec_o_party_tmp),
+        # rec_o_party = Seq(
+        #     If(App.globalGet(GLOBAL_BUYER) == Txn.sender())
+        #     .Then(
+        #         # (rec_o_party_tmp := ContractUpdate()).decode(
+        #         (rec_o_party_tmp := ContractUpdate()).decode(
+        #             self.glbl_slr_update.get()
+        #         ),  # Get other party proposed revision
+        #         #     Return(rec_o_party_tmp),
+        #     )
+        #     .Else(
+        #         # (rec_o_party_tmp := ContractUpdate()).decode(
+        #         (rec_o_party_tmp := ContractUpdate()).decode(
+        #             self.glbl_byr_update.get()
+        #         ),  # Get other party proposed revision
+        #         #     Return(rec_o_party_tmp),
+        #     )
         # )
-        # .Else(
-        #     # (rec_o_party_tmp := ContractUpdate()).decode(
-        #     (ContractUpdate()).decode(
-        #         self.glbl_byr_update.get()
-        #     ),  # Get other party proposed revision
-        #     #     Return(rec_o_party_tmp),
-        # )
+        rec_o_party = Cond(
+            [
+                App.globalGet(GLOBAL_BUYER) == Txn.sender(),
+                Seq(
+                    (rec_o_party_tmp := ContractUpdate()).decode(
+                        self.glbl_slr_update.get()
+                    ),
+                    rec_o_party_tmp,
+                ),
+            ],
+            [
+                App.globalGet(GLOBAL_SELLER) == Txn.sender(),
+                Seq(
+                    (rec_o_party_tmp := ContractUpdate()).decode(
+                        self.glbl_byr_update.get()
+                    ),
+                    rec_o_party_tmp,
+                ),
+            ],
+            # .Then(
+            #     # (rec_o_party_tmp := ContractUpdate()).decode(
+            #     (rec_o_party_tmp := ContractUpdate()).decode(
+            #         self.glbl_slr_update.get()
+            #     ),  # Get other party proposed revision
+            #     #     Return(rec_o_party_tmp),
+            # )
+            # .Else(
+            #     # (rec_o_party_tmp := ContractUpdate()).decode(
+            #     (rec_o_party_tmp := ContractUpdate()).decode(
+            #         self.glbl_byr_update.get()
+            #     ),  # Get other party proposed revision
+            #     #     Return(rec_o_party_tmp),
+            # )
+        )
 
         return Seq(
             rec_o_party,
