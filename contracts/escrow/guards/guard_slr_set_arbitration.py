@@ -4,7 +4,7 @@ from ..constants import *
 
 
 @Subroutine(TealType.uint64)
-def guard_seller_set_arbitration(acct: Expr):
+def guard_slr_set_arbitration(acct: Expr):
     return Seq(
         Or(
             And(
