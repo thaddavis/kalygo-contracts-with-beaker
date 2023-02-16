@@ -4,7 +4,7 @@ from ..constants import *
 
 
 @Subroutine(TealType.uint64)
-def guard_buyer_set_pullout(acct: Expr):
+def guard_byr_set_pullout(acct: Expr):
     return Seq(
         And(
             App.globalGet(GLOBAL_BUYER) == Txn.sender(),
