@@ -303,118 +303,6 @@ class EscrowContract(Application):
             ]
         )
 
-    # @external(authorize=guard_byr_request_contract_update)
-    # def request_contract_update(
-    #     self,
-    #     byr: abi.Address,
-    #     slr: abi.Address,
-    #     escrow_1: abi.Uint64,
-    #     escrow_2: abi.Uint64,
-    #     total: abi.Uint64,
-    #     inspect_start_date: abi.Uint64,
-    #     inspect_end_date: abi.Uint64,
-    #     inspect_extension_date: abi.Uint64,
-    #     moving_date: abi.Uint64,
-    #     closing_date: abi.Uint64,
-    #     free_funds_date: abi.Uint64,
-    # ):
-    #     return Seq(
-    #         (rec_slr := ContractUpdate()).decode(
-    #             self.glbl_slr_update.get()
-    #         ),  # Get other party proposed revision
-    #         If(Len(self.glbl_slr_update.get()) > Int(0))
-    #         .Then(
-    #             If(
-    #                 And(
-    #                     rec_slr.byr.use(lambda value: value.get() == byr.get()),
-    #                     rec_slr.slr.use(lambda value: value.get() == slr.get()),
-    #                     rec_slr.escrow_1.use(
-    #                         lambda value: value.get() == escrow_1.get()
-    #                     ),
-    #                     rec_slr.escrow_2.use(
-    #                         lambda value: value.get() == escrow_2.get()
-    #                     ),
-    #                     rec_slr.total.use(lambda value: value.get() == total.get()),
-    #                     rec_slr.inspect_start_date.use(
-    #                         lambda value: value.get() == inspect_start_date.get()
-    #                     ),
-    #                     rec_slr.inspect_end_date.use(
-    #                         lambda value: value.get() == inspect_end_date.get()
-    #                     ),
-    #                     rec_slr.inspect_extension_date.use(
-    #                         lambda value: value.get() == inspect_extension_date.get()
-    #                     ),
-    #                     rec_slr.moving_date.use(
-    #                         lambda value: value.get() == moving_date.get()
-    #                     ),
-    #                     rec_slr.closing_date.use(
-    #                         lambda value: value.get() == closing_date.get()
-    #                     ),
-    #                     rec_slr.free_funds_date.use(
-    #                         lambda value: value.get() == free_funds_date.get()
-    #                     ),
-    #                 )
-    #             )
-    #             .Then(
-    #                 Seq(
-    #                     self.glbl_byr.set(byr.get()),
-    #                     self.glbl_slr.set(slr.get()),
-    #                     self.glbl_escrow_1.set(escrow_1.get()),
-    #                     self.glbl_escrow_2.set(escrow_2.get()),
-    #                     self.glbl_total.set(total.get()),
-    #                     self.glbl_inspect_start_date.set(inspect_start_date.get()),
-    #                     self.glbl_inspect_end_date.set(inspect_end_date.get()),
-    #                     self.glbl_inspect_extension_date.set(
-    #                         inspect_extension_date.get()
-    #                     ),
-    #                     self.glbl_moving_date.set(moving_date.get()),
-    #                     self.glbl_closing_date.set(closing_date.get()),
-    #                     self.glbl_free_funds_date.set(free_funds_date.get()),
-    #                     #
-    #                     self.glbl_byr_update.set(Bytes("")),
-    #                     self.glbl_slr_update.set(Bytes("")),
-    #                 )
-    #             )
-    #             .Else(
-    #                 Seq(
-    #                     (rec := ContractUpdate()).set(
-    #                         byr,
-    #                         slr,
-    #                         escrow_1,
-    #                         escrow_2,
-    #                         total,
-    #                         inspect_start_date,
-    #                         inspect_end_date,
-    #                         inspect_extension_date,
-    #                         moving_date,
-    #                         closing_date,
-    #                         free_funds_date,
-    #                     ),
-    #                     self.glbl_byr_update.set(rec.encode()),
-    #                 )
-    #             )
-    #         )
-    #         .Else(
-    #             Seq(
-    #                 (rec := ContractUpdate()).set(
-    #                     byr,
-    #                     slr,
-    #                     escrow_1,
-    #                     escrow_2,
-    #                     total,
-    #                     inspect_start_date,
-    #                     inspect_end_date,
-    #                     inspect_extension_date,
-    #                     moving_date,
-    #                     closing_date,
-    #                     free_funds_date,
-    #                 ),
-    #                 self.glbl_byr_update.set(rec.encode()),
-    #             )
-    #         ),
-    #         Approve(),
-    #     )
-
     @external(authorize=guard_request_contract_update)
     def request_contract_update(
         self,
@@ -430,87 +318,15 @@ class EscrowContract(Application):
         closing_date: abi.Uint64,
         free_funds_date: abi.Uint64,
     ):
-        # rec_o_party = (
-        #     Cond(
-        #         [
-        #             App.globalGet(GLOBAL_BUYER) == Txn.sender(),
-        #             (rec_o_party_tmp := ContractUpdate()).decode(
-        #                 # self.glbl_slr_update.get()
-        #                 self.glbl_slr_update.get()
-        #             ),
-        #         ],
-        #         [
-        #             App.globalGet(GLOBAL_SELLER) == Txn.sender(),
-        #             (rec_o_party_tmp := ContractUpdate()).decode(
-        #                 # self.glbl_slr_update.get()
-        #                 self.glbl_byr_update.get()
-        #             ),
-        #         ],
-        #     ),
-        # )
-        # (rec_o_party := ContractUpdate()).decode(
-        #     # self.glbl_slr_update.get()
-        #     self.glbl_slr_update
-        # ) if App.globalGet(GLOBAL_BUYER) == Txn.sender() else (
-        #     rec_o_party := ContractUpdate()
-        # ).decode(
-        #     # self.glbl_byr_update.get()
-        #     self.glbl_byr_update
-        # )  # Get other party proposed revision
-        # rec_o_party = Seq(
-        #     If(App.globalGet(GLOBAL_BUYER) == Txn.sender())
-        #     .Then(
-        #         # (rec_o_party_tmp := ContractUpdate()).decode(
-        #         (rec_o_party_tmp := ContractUpdate()).decode(
-        #             self.glbl_slr_update.get()
-        #         ),  # Get other party proposed revision
-        #         #     Return(rec_o_party_tmp),
-        #     )
-        #     .Else(
-        #         # (rec_o_party_tmp := ContractUpdate()).decode(
-        #         (rec_o_party_tmp := ContractUpdate()).decode(
-        #             self.glbl_byr_update.get()
-        #         ),  # Get other party proposed revision
-        #         #     Return(rec_o_party_tmp),
-        #     )
-        # )
-        rec_o_party = Cond(
-            [
-                App.globalGet(GLOBAL_BUYER) == Txn.sender(),
-                Seq(
-                    (rec_o_party_tmp := ContractUpdate()).decode(
-                        self.glbl_slr_update.get()
-                    ),
-                    rec_o_party_tmp,
-                ),
-            ],
-            [
-                App.globalGet(GLOBAL_SELLER) == Txn.sender(),
-                Seq(
-                    (rec_o_party_tmp := ContractUpdate()).decode(
-                        self.glbl_byr_update.get()
-                    ),
-                    rec_o_party_tmp,
-                ),
-            ],
-            # .Then(
-            #     # (rec_o_party_tmp := ContractUpdate()).decode(
-            #     (rec_o_party_tmp := ContractUpdate()).decode(
-            #         self.glbl_slr_update.get()
-            #     ),  # Get other party proposed revision
-            #     #     Return(rec_o_party_tmp),
-            # )
-            # .Else(
-            #     # (rec_o_party_tmp := ContractUpdate()).decode(
-            #     (rec_o_party_tmp := ContractUpdate()).decode(
-            #         self.glbl_byr_update.get()
-            #     ),  # Get other party proposed revision
-            #     #     Return(rec_o_party_tmp),
-            # )
-        )
-
         return Seq(
-            rec_o_party,
+            (rec_o_party := ContractUpdate()).decode(
+                If(
+                    App.globalGet(GLOBAL_BUYER) == Txn.sender(),
+                )
+                .Then(self.glbl_slr_update.get())
+                .ElseIf(App.globalGet(GLOBAL_SELLER) == Txn.sender())
+                .Then(self.glbl_byr_update.get())
+            ),
             If(Len(self.glbl_byr_update.get()) > Int(0))
             .Then(
                 If(
@@ -579,7 +395,16 @@ class EscrowContract(Application):
                             closing_date,
                             free_funds_date,
                         ),
-                        self.glbl_slr_update.set(rec.encode()),
+                        If(
+                            App.globalGet(GLOBAL_BUYER) == Txn.sender(),
+                        )
+                        .Then(
+                            self.glbl_byr_update.set(rec.encode()),
+                        )
+                        .ElseIf(App.globalGet(GLOBAL_SELLER) == Txn.sender())
+                        .Then(
+                            self.glbl_slr_update.set(rec.encode()),
+                        ),
                     )
                 )
             )
@@ -598,7 +423,16 @@ class EscrowContract(Application):
                         closing_date,
                         free_funds_date,
                     ),
-                    self.glbl_slr_update.set(rec.encode()),
+                    If(
+                        App.globalGet(GLOBAL_BUYER) == Txn.sender(),
+                    )
+                    .Then(
+                        self.glbl_byr_update.set(rec.encode()),
+                    )
+                    .ElseIf(App.globalGet(GLOBAL_SELLER) == Txn.sender())
+                    .Then(
+                        self.glbl_slr_update.set(rec.encode()),
+                    ),
                 )
             ),
             Approve(),
