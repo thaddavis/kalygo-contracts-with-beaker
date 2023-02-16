@@ -437,16 +437,16 @@ class EscrowContract(Application):
                     (rec_o_party_tmp := ContractUpdate()).decode(
                         self.glbl_slr_update.get()
                     ),  # Get other party proposed revision
+                    rec_o_party_tmp,
                 ),
-                rec_o_party_tmp,
             )
             .Else(
                 Seq(
                     (rec_o_party_tmp := ContractUpdate()).decode(
                         self.glbl_byr_update.get()
                     ),  # Get other party proposed revision
+                    rec_o_party_tmp,
                 ),
-                rec_o_party_tmp,
             )
         )
 
