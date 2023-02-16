@@ -430,15 +430,33 @@ class EscrowContract(Application):
         closing_date: abi.Uint64,
         free_funds_date: abi.Uint64,
     ):
-        (rec_o_party := ContractUpdate()).decode(
-            # self.glbl_slr_update.get()
-            self.glbl_slr_update
-        ) if App.globalGet(GLOBAL_BUYER) == Txn.sender() else (
-            rec_o_party := ContractUpdate()
-        ).decode(
-            # self.glbl_byr_update.get()
-            self.glbl_byr_update
-        )  # Get other party proposed revision
+        rec_o_party = (
+            Cond(
+                [
+                    App.globalGet(GLOBAL_BUYER) == Txn.sender(),
+                    (rec_o_party_tmp := ContractUpdate()).decode(
+                        # self.glbl_slr_update.get()
+                        self.glbl_slr_update.get()
+                    ),
+                ],
+                [
+                    App.globalGet(GLOBAL_SELLER) == Txn.sender(),
+                    (rec_o_party_tmp := ContractUpdate()).decode(
+                        # self.glbl_slr_update.get()
+                        self.glbl_byr_update.get()
+                    ),
+                ],
+            ),
+        )
+        # (rec_o_party := ContractUpdate()).decode(
+        #     # self.glbl_slr_update.get()
+        #     self.glbl_slr_update
+        # ) if App.globalGet(GLOBAL_BUYER) == Txn.sender() else (
+        #     rec_o_party := ContractUpdate()
+        # ).decode(
+        #     # self.glbl_byr_update.get()
+        #     self.glbl_byr_update
+        # )  # Get other party proposed revision
         # If(App.globalGet(GLOBAL_BUYER) == Txn.sender())
         # .Then(
         #     # (rec_o_party_tmp := ContractUpdate()).decode(
