@@ -318,6 +318,32 @@ class EscrowContract(Application):
         closing_date: abi.Uint64,
         free_funds_date: abi.Uint64,
     ):
+        store_revision_request = Seq(
+            (rec := ContractUpdate()).set(
+                byr,
+                slr,
+                escrow_1,
+                escrow_2,
+                total,
+                inspect_start_date,
+                inspect_end_date,
+                inspect_extension_date,
+                moving_date,
+                closing_date,
+                free_funds_date,
+            ),
+            If(
+                App.globalGet(GLOBAL_BUYER) == Txn.sender(),
+            )
+            .Then(
+                self.glbl_byr_update.set(rec.encode()),
+            )
+            .ElseIf(App.globalGet(GLOBAL_SELLER) == Txn.sender())
+            .Then(
+                self.glbl_slr_update.set(rec.encode()),
+            ),
+        )
+
         return Seq(
             (rec_o_party := ContractUpdate()).decode(
                 If(
@@ -380,60 +406,8 @@ class EscrowContract(Application):
                         self.glbl_slr_update.set(Bytes("")),
                     )
                 )
-                .Else(
-                    Seq(
-                        (rec := ContractUpdate()).set(
-                            byr,
-                            slr,
-                            escrow_1,
-                            escrow_2,
-                            total,
-                            inspect_start_date,
-                            inspect_end_date,
-                            inspect_extension_date,
-                            moving_date,
-                            closing_date,
-                            free_funds_date,
-                        ),
-                        If(
-                            App.globalGet(GLOBAL_BUYER) == Txn.sender(),
-                        )
-                        .Then(
-                            self.glbl_byr_update.set(rec.encode()),
-                        )
-                        .ElseIf(App.globalGet(GLOBAL_SELLER) == Txn.sender())
-                        .Then(
-                            self.glbl_slr_update.set(rec.encode()),
-                        ),
-                    )
-                )
+                .Else(store_revision_request)
             )
-            .Else(
-                Seq(
-                    (rec := ContractUpdate()).set(
-                        byr,
-                        slr,
-                        escrow_1,
-                        escrow_2,
-                        total,
-                        inspect_start_date,
-                        inspect_end_date,
-                        inspect_extension_date,
-                        moving_date,
-                        closing_date,
-                        free_funds_date,
-                    ),
-                    If(
-                        App.globalGet(GLOBAL_BUYER) == Txn.sender(),
-                    )
-                    .Then(
-                        self.glbl_byr_update.set(rec.encode()),
-                    )
-                    .ElseIf(App.globalGet(GLOBAL_SELLER) == Txn.sender())
-                    .Then(
-                        self.glbl_slr_update.set(rec.encode()),
-                    ),
-                )
-            ),
+            .Else(store_revision_request),
             Approve(),
         )
