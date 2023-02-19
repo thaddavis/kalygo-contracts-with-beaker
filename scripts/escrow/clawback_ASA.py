@@ -17,7 +17,7 @@ def main():
     params = get_txn_params(Algod.getClient())
     sender = "A3326WI7EK3RVOQ4JRZSLY3HO26JCVGT7HGU2RBBFAX3KOVG4XFA4XCTOQ"  # use the `print_ASA_info.py` script to find the clawback address for the asset
     receiver = "YRRGGYPFQYUIKHTYCWL3V7FGMDNNVZ46QJKE6GQQDURQL3NIVUIUFQSXAY"
-    revocation_target = "WQRENTEFJYQBZ3KSZA2DON35CLDY4G24VF3KDQ5FVQFWADXJLL2HOUT544"
+    revocation_target = "IT6F2QSMA73LCSZCVIE44I63GZB2WL4D7C3O7ZPMMWFTI33ZVFBYPDW5MU"
 
     sender_private_key = get_private_key_from_mnemonic(
         "device hour foster key rhythm worry able mom student fatal spread forest fresh nominee frown hedgehog medal wood balance hole solar accident place able soap"

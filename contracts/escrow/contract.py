@@ -258,7 +258,8 @@ class EscrowContract(Application):
             Approve(),
         )
 
-    @external(authorize=guard_withdraw_escrow_balance)
+    # @external(authorize=guard_withdraw_escrow_balance)
+    @external()
     def withdraw_escrow_balance(self):
         contract_ASA_balance = AssetHolding.balance(
             Global.current_application_address(), App.globalGet(GLOBAL_ASA_ID)
